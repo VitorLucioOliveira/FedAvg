@@ -1,10 +1,13 @@
-# 🍽️ Entendendo DataLoaders no PyTorch com Analogia de Buffet
+
+# Segunda Parte
+
+## 🍽️ Entendendo DataLoaders no PyTorch com Analogia de Buffet
 
 Este documento explica de forma intuitiva e técnica como funcionam os `DataLoaders` no PyTorch, especialmente no contexto de projetos de **Aprendizagem Federada com Flower**.
 
 ---
 
-## 🧠 Analogia: O Buffet de Comida
+#### 🧠 Analogia: O Buffet de Comida
 
 Imagine o seguinte:
 
@@ -23,28 +26,28 @@ O processo acontece assim:
 
 ---
 
-## 🔧 O Que São e Para Que Servem os DataLoaders?
+#### 🔧 O Que São e Para Que Servem os DataLoaders?
 
 Um `DataLoader` é um objeto do PyTorch que envolve um `Dataset` e o torna **iterável**. Ele resolve quatro problemas principais:
 
-### 💾 1. Gerenciamento de Memória
+###### 💾 1. Gerenciamento de Memória
 
 - Datasets grandes **não cabem na memória** de uma vez.
 - O `DataLoader` carrega **apenas um batch por vez**, economizando RAM/VRAM.
 
-### ⚙️ 2. Eficiência no Treinamento (Batches)
+###### ⚙️ 2. Eficiência no Treinamento (Batches)
 
 - Treinar uma imagem por vez é **ineficiente**.
 - Treinar o dataset inteiro de uma vez é **impossível**.
 - **Batches** (ex: 20 imagens por batch) equilibram desempenho e uso de memória.
 - O `DataLoader` automatiza essa divisão.
 
-### 🔀 3. Embaralhamento dos Dados (Shuffling)
+###### 🔀 3. Embaralhamento dos Dados (Shuffling)
 
 - Apresentar os dados sempre na mesma ordem pode **gerar vícios** no modelo.
 - O parâmetro `shuffle=True` **embaralha os dados a cada época**, melhorando o aprendizado.
 
-### 🤖 4. Processamento Paralelo (`num_workers`)
+###### 🤖 4. Processamento Paralelo (`num_workers`)
 
 - `num_workers > 0`: permite que múltiplos processos **preparem batches em paralelo**.
 - Evita que a GPU fique ociosa esperando o carregamento dos dados.
@@ -52,22 +55,22 @@ Um `DataLoader` é um objeto do PyTorch que envolve um `Dataset` e o torna **ite
 
 ---
 
-## 🌐 Aplicando ao Projeto Federado com Flower
+#### 🌐 Aplicando ao Projeto Federado com Flower
 
 No seu projeto de Aprendizagem Federada com Flower, o uso de `DataLoaders` se encaixa assim:
 
-### 👥 Estrutura com 100 Clientes
+###### 👥 Estrutura com 100 Clientes
 
 - Cada cliente tem seu próprio conjunto de dados (privado e isolado).
 - O script `dataset.py` gera:
   - `trainloaders[0]`, ..., `trainloaders[99]`: carregadores de treino.
   - `valloaders[0]`, ..., `valloaders[99]`: carregadores de validação.
 
-### 🧪 Validação
+###### 🧪 Validação
 
 - Os **DataLoaders de validação** (`valloaders`) testam a performance do modelo em dados **não vistos no treino**, prevenindo **overfitting**.
 
-### ⚡ Integração com o FlowerClient
+###### ⚡ Integração com o FlowerClient
 
 O ciclo para um cliente participante (ex: Cliente 42):
 
@@ -83,7 +86,7 @@ O ciclo para um cliente participante (ex: Cliente 42):
 
 ---
 
-## ✅ Conclusão
+#### ✅ Conclusão
 
 O `DataLoader` é uma ferramenta essencial que:
 
