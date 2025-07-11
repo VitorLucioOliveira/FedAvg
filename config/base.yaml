@@ -1,0 +1,7 @@
+---
+num_round: 10         # Número de rodadas de treinamento
+num_clients: 100      # Número total de clientes na simulação
+batch_size: 20        # Tamanho do lote de dados para treinamento em cada cliente
+config_fit:
+  lr: 0.01            # Taxa de aprendizado (learning rate)
+  momentum: 0.9       # Momento (um parâmetro do otimizador)
