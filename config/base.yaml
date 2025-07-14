@@ -5,3 +5,4 @@ batch_size: 20        # Tamanho do lote de dados para treinamento em cada client
 config_fit:
   lr: 0.01            # Taxa de aprendizado (learning rate)
   momentum: 0.9       # Momento (um parâmetro do otimizador)
+  local_epochs: 1

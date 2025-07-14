@@ -16,31 +16,29 @@ def get_mnist(data_path: str = "./data"):
 # Função principal que prepara os dados para os clientes
 def prepare_dataset(num_partitions: int, bacth_size: int, val_ratio: float = 0.1):
 
-    trainset, testset = get_mnist() # Pega o dataset completo
+    trainset, testset = get_mnist() # Pega o dataset completo (60000) [imagem, rótulo]
     
-    # IID --> split trainset into 'num_partitions' trainsets
-    # Divide o conjunto de treino em 'num_partitions' (100) partes iguais
-    num_images = len(trainset) // num_partitions
+    # IID --> Ceiando lista de clientes e os números de dados em cada uma (iguais)
     
-    partition_len = [num_images] * num_partitions
-    
-    trainset = random_split(trainset, partition_len, torch.Generator().manual_seed(2023))
+    num_images = len(trainset) // num_partitions # Quantas imagens cada cliente receberá
+    partition_len = [num_images] * num_partitions #Lista de clientes com dados vazios
+    trainset = random_split(trainset, partition_len, torch.Generator().manual_seed(2023)) # Trainset é agora uma lista de 100 data bases, cada uma com 600 images/rotulos
     
     # create dataloader with train+val support --- data retroactivity FL
-    # Cria DataLoaders (carregadores de dados) para cada cliente
+ 
     trainloaders= []
     valloaders = []
     
     # Separa uma pequena parte dos dados de cada cliente para validação
     for set in trainset:
-        num_total = len(set)
-        num_val = int(val_ratio * num_total)
-        num_train = num_total - num_val
+        num_total = len(set)# Total de dados no cliente [imagem, rotulo]
+        num_val = int(val_ratio * num_total)# Separa uma parte (10%) pra validação
+        num_train = num_total - num_val # O resto (90%) para testes 
         
         for_train, for_val = random_split(set, [num_train, num_val], torch.Generator().manual_seed(2023))
 
-        trainloaders.append(DataLoader(for_train, bacth_size, shuffle=True, num_workers=2)) 
-        valloaders.append(DataLoader(for_train, bacth_size, shuffle=True, num_workers=2))
+        trainloaders.append(DataLoader(for_train, bacth_size, shuffle=True, num_workers=0)) # Adiciona o DataLoader para a lista de treino
+        valloaders.append(DataLoader(for_val, bacth_size, shuffle=False, num_workers=0)) # Adiciona o DataLoader para lista de teste
         
     # Cria um único DataLoader para o teste final
     testlaoders = DataLoader(testset, batch_size=128)
