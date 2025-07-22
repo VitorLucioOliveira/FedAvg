@@ -12,12 +12,8 @@ class FlowerClient(fl.client.NumPyClient):
         
         self.trainloader = trainloader
         self.valloader = valloader
-        
-        # Modelo a ser treinado
-        self.model = Net(num_classes)
-        
-        # Dispositivo a ser treinado
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.model = Net(num_classes) # Modelo a ser treinado
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # Dispositivo a ser treinado
 
     def set_parameters(self, parameters):
         
@@ -34,13 +30,13 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         # update do cliente com os parametros do servidor central
         
-        self.set_parameters(parameters)
+        self.set_parameters(parameters) # descartar os pesos do seu modelo local e substituí-los pelos parameters
         
         lr = config['lr']
         momentum = config['momentum'] # pra que serve?
         epochs = config['local_epochs']
         
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=lr, momentum=momentum) # encontra os pesos otimos
         
         # fazer o treino local
         train(self.model, self.trainloader, optimizer)

@@ -28,43 +28,43 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         return self.fc3(x)
     
-    def train(net, trainloader, epochs, lr, device):
-   
-        net.to(device)  # move model to GPU if available
-        criterion = torch.nn.CrossEntropyLoss().to(device)
-        optimizer = torch.optim.Adam(net.parameters(), lr=lr)
-        net.train()
-        running_loss = 0.0
-        for _ in range(epochs):
-            for batch in trainloader:
-                images = batch["image"]
-                labels = batch["label"]
-                optimizer.zero_grad()
-                loss = criterion(net(images.to(device)), labels.to(device))
-                loss.backward()
-                optimizer.step()
-                running_loss += loss.item()
+def train(net, trainloader, epochs, lr, device):
 
-        avg_trainloss = running_loss / len(trainloader)
-        return avg_trainloss
+    net.to(device)  # move model to GPU if available
+    criterion = torch.nn.CrossEntropyLoss().to(device)
+    optimizer = torch.optim.Adam(net.parameters(), lr=lr)
+    net.train()
+    running_loss = 0.0
+    for _ in range(epochs):
+        for batch in trainloader:
+            images = batch["image"]
+            labels = batch["label"]
+            optimizer.zero_grad()
+            loss = criterion(net(images.to(device)), labels.to(device))
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+
+    avg_trainloss = running_loss / len(trainloader)
+    return avg_trainloss
 
 
-    def test(net, testloader, device):
-        """Validate the model on the test set.
+def test(net, testloader, device):
+    """Validate the model on the test set.
 
-        This is a fairly standard training loop for PyTorch. Note there is nothing specific
-        about Flower or Federated AI here.
-        """
-        net.to(device)
-        criterion = torch.nn.CrossEntropyLoss()
-        correct, loss = 0, 0.0
-        with torch.no_grad():
-            for batch in testloader:
-                images = batch["image"].to(device)
-                labels = batch["label"].to(device)
-                outputs = net(images)
-                loss += criterion(outputs, labels).item()
-                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-        accuracy = correct / len(testloader.dataset)
-        loss = loss / len(testloader)
-        return loss, accuracy
+    This is a fairly standard training loop for PyTorch. Note there is nothing specific
+    about Flower or Federated AI here.
+    """
+    net.to(device)
+    criterion = torch.nn.CrossEntropyLoss()
+    correct, loss = 0, 0.0
+    with torch.no_grad():
+        for batch in testloader:
+            images = batch["image"].to(device)
+            labels = batch["label"].to(device)
+            outputs = net(images)
+            loss += criterion(outputs, labels).item()
+            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+    accuracy = correct / len(testloader.dataset)
+    loss = loss / len(testloader)
+    return loss, accuracy

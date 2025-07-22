@@ -1,4 +1,3 @@
-
 # Segunda Parte
 
 ## 🍽️ Entendendo DataLoaders no PyTorch com Analogia de Buffet
@@ -57,8 +56,6 @@ Um `DataLoader` é um objeto do PyTorch que envolve um `Dataset` e o torna **ite
 
 #### 🌐 Aplicando ao Projeto Federado com Flower
 
-No seu projeto de Aprendizagem Federada com Flower, o uso de `DataLoaders` se encaixa assim:
-
 ###### 👥 Estrutura com 100 Clientes
 
 - Cada cliente tem seu próprio conjunto de dados (privado e isolado).
@@ -98,3 +95,92 @@ O `DataLoader` é uma ferramenta essencial que:
 Com ele, cada cliente tem seu próprio "prato" de dados, processado com autonomia, segurança e eficiência.
 
 ---
+
+# Terceira Parte
+
+## 👨‍💻 O Cliente Federado: Anatomia de um Trabalhador (`client.py`)
+
+O arquivo `client.py` define o "DNA" de cada participante da rede. Ele é um agente autônomo que possui seus próprios dados, seu próprio modelo e sabe como treinar e se comunicar com o servidor.
+
+---
+
+### 🏛️ Estrutura da Classe `FlowerClient`
+
+A classe `FlowerClient` representa um único cliente e encapsula toda a sua lógica.
+
+#### 🆕 Atributos Essenciais (`__init__`)
+
+Ao ser criado, o cliente é equipado com:
+
+- `self.trainloader` / `self.valloader`: Sua fonte pessoal e privada de dados para treino e validação.
+- `self.model`: Seu próprio "cérebro". Cada cliente instancia seu modelo localmente, garantindo uma arquitetura limpa e idêntica entre todos.
+- `self.device`: Detector de hardware que escolhe automaticamente entre GPU e CPU para otimizar o desempenho.
+
+---
+
+### 📞 Métodos de Comunicação
+
+Estes métodos definem a interface com o servidor:
+
+- `set_parameters(parameters)`: Recebe os pesos do modelo global do servidor. É como receber a "lição de casa".
+- `get_parameters()`: Envia os pesos do seu modelo recém-treinado de volta. É como entregar a lição resolvida.
+
+---
+
+### 🎬 Métodos de Ação
+
+São os métodos que o servidor chama para iniciar tarefas no cliente:
+
+- `fit(parameters, config)`: O coração do cliente.
+  - Recebe os pesos globais (`parameters`).
+  - Usa `config` (ex: `lr`, `momentum`, `epochs`) para configurar o otimizador.
+  - Executa `train()` com seus dados locais.
+
+- `evaluate(parameters, config)`: A autoavaliação local.
+  - Recebe os pesos globais.
+  - Testa em seus dados de validação.
+
+---
+
+### 🏭 A Fábrica de Clientes: `generate_client`
+
+Para economizar memória, os 100 clientes não são criados de uma vez. A função `generate_client` atua como uma fábrica, criando sob demanda apenas o cliente selecionado para a rodada.
+
+---
+
+# Quarta Parte
+
+## 🧠 O Servidor e a Estratégia: O Maestro da Orquestra (`server.py`)
+
+Se o cliente é um músico, o servidor é o maestro. Ele **não treina modelos** nem vê dados, mas coordena toda a orquestra para produzir o modelo global.
+
+---
+
+### ♟️ A Estratégia `FedAvg`: O Cérebro do Servidor
+
+A estratégia `FedAvg` define o **comportamento do servidor** durante as rodadas.
+
+#### 📊 Seleção de Clientes
+
+- `min_fit_clients`: Número de clientes que treinarão a cada rodada.
+- `min_available_clients`: Número mínimo de clientes que precisam estar online para a rodada começar.
+
+---
+
+### ⚙️ Configuração Dinâmica (`on_fit_config_fn`)
+
+Permite que o servidor envie **instruções diferentes a cada rodada**:
+
+- A função referenciada é chamada a cada rodada.
+- Pode alterar, por exemplo, a `learning rate` conforme o modelo evolui.
+
+---
+
+### 🏆 Avaliação Centralizada (`evaluate_fn`)
+
+Realiza uma avaliação **justa e padronizada** do modelo global:
+
+- O servidor testa os novos pesos em um `testloader` **que nenhum cliente viu**.
+- O resultado representa o **desempenho real e imparcial** do modelo.
+
+> 📈 Essa métrica é o "placar final" do experimento, essencial para medir sucesso em aprendizado federado.
